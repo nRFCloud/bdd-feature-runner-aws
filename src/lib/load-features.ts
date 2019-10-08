@@ -1,7 +1,6 @@
 import { afterRx } from './runner'
-
 const Gherkin = require('gherkin')
-const toposort = require('toposort')
+import * as toposort from 'toposort'
 import * as globAsync from 'glob'
 import { promisify } from 'util'
 import * as path from 'path'
@@ -71,7 +70,7 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 	const featureDependencies = sortedByLast.map(feature => {
 		const bg = feature.children.find(({ type }) => type === 'Background')
 		if (!bg) {
-			return [[feature.name, false]]
+			return [[feature.name, undefined]]
 		}
 		return bg.steps
 			.filter(({ text }) => afterRx.test(text))
@@ -86,14 +85,18 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 							`The feature ${m[1]} you want to run after does not exist!`,
 						)
 					}
-					return [...deps, [m[1], feature.name]]
+					return [...deps, [m[1], feature.name]] as [
+						string,
+						string | undefined,
+					][]
 				},
-				[] as string[][],
+				[] as [string, string | undefined][],
 			)
 	})
-	const sortedFeatureNames = toposort(featureDependencies.flat()).filter(
-		(feature?: any) => feature,
-	)
+	const sortedFeatureNames = toposort(featureDependencies.flat() as [
+		string,
+		string | undefined,
+	][]).filter((feature?: any) => feature)
 	const dependencies = (f: Feature): Feature[] =>
 		sortedFeatures.filter(({ name }) => {
 			const depNames = featureDependencies
@@ -106,7 +109,7 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 	// Now bring the features in the right order
 	const sortedFeatures: Feature[] = sortedFeatureNames.map(
 		(featureName: string) =>
-			parsedFeatures.find(({ name }) => name === featureName),
+			parsedFeatures.find(({ name }) => name === featureName) as Feature,
 	)
 
 	// Find features to be skipped

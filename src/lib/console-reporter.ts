@@ -6,8 +6,7 @@ import {
 	StepResult,
 	StepRunnerNotDefinedError,
 } from './runner'
-
-const chalk = require('chalk')
+import chalk from 'chalk'
 import * as Chai from 'chai'
 
 type Config = { printResults: boolean; printProgress: boolean }
@@ -76,7 +75,7 @@ const reportFeature = (result: FeatureResult) => {
 		}
 	}
 	if (result.feature.tags.length) {
-		i.push(chalk.blueBright(result.feature.tags.map(({ name }) => name)))
+		i.push(result.feature.tags.map(({ name }) => chalk.blueBright(name)))
 	}
 	console.log(...i)
 }

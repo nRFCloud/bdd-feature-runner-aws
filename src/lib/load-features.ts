@@ -1,5 +1,9 @@
 import { afterRx } from './runner'
-const Gherkin = require('gherkin')
+import TokenScanner from 'gherkin/dist/src/TokenScanner'
+import AstBuilder from 'gherkin/dist/src/AstBuilder'
+import Parser from 'gherkin/dist/src/Parser'
+import TokenMatcher from 'gherkin/dist/src/TokenMatcher'
+import { messages as cucumber } from 'cucumber-messages'
 import * as toposort from 'toposort'
 import * as globAsync from 'glob'
 import { promisify } from 'util'
@@ -8,56 +12,20 @@ import * as path from 'path'
 const glob = promisify(globAsync)
 import { readFileSync } from 'fs'
 
-const parser = new Gherkin.Parser(new Gherkin.AstBuilder())
-const matcher = new Gherkin.TokenMatcher()
+const parser = new Parser(new AstBuilder())
+const matcher = new TokenMatcher()
 
-export type Step = {
-	type: 'Step'
-	text: string
-	argument?: { type: 'DocString'; content: string }
-}
-export type Scenario = {
-	type: 'Background' | 'Scenario' | 'ScenarioOutline'
-	name: string
-	steps: Step[]
-	argument: string
-	keyword: string
-	examples?: Example[]
-}
-export type Feature = {
-	type: 'Feature'
-	name: string
-	children: Scenario[]
-	tags: { type: 'Tag'; name: string }[]
-}
-
-export type Example = {
-	type: 'Example'
-	keyword: string
-	name: string
-	description?: string
-	tableHeader: TableRow
-	tableBody: TableRow[]
-}
-export type TableRow = {
-	type: 'TableRow'
-	cells: Cell[]
-}
-export type Cell = {
-	type: 'TableCell'
-	value: string
-}
-
-export type SkippableFeature = Feature & {
+export type SkippableFeature = cucumber.GherkinDocument.IFeature & {
 	skip: boolean
-	dependsOn: Feature[]
+	dependsOn: cucumber.GherkinDocument.IFeature[]
 }
 
 export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
-	const parsedFeatures: Feature[] = featureData.map(d => {
+	const parsedFeatures = featureData.map(d => {
 		// Parse the feature files
-		const scanner = new Gherkin.TokenScanner(d.toString())
-		return parser.parse(scanner, matcher).feature
+		const scanner = new TokenScanner(d.toString())
+		return parser.parse(scanner, matcher)
+			.feature as cucumber.GherkinDocument.IFeature
 	})
 
 	// Sort @Last to end
@@ -68,15 +36,17 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 	const featureNames = sortedByLast.map(({ name }) => name)
 	// Sort the features by the step 'I am run after the "..." feature' using toposort
 	const featureDependencies = sortedByLast.map(feature => {
-		const bg = feature.children.find(({ type }) => type === 'Background')
+		const bg = feature.children.find(({ background }) => background) as
+			| cucumber.GherkinDocument.IFeature.IBackground
+			| undefined
 		if (!bg) {
 			return [[feature.name, undefined]]
 		}
-		return bg.steps
-			.filter(({ text }) => afterRx.test(text))
+		return (bg.steps || [])
+			.filter(({ text }) => text && afterRx.test(text))
 			.reduce(
 				(deps, afterStep) => {
-					const m = afterRx.exec(afterStep.text)
+					const m = afterStep.text && afterRx.exec(afterStep.text)
 					if (!m) {
 						throw new Error(`Failed to find feature in ${afterStep.text}`)
 					}
@@ -97,7 +67,9 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 		string,
 		string | undefined,
 	][]).filter((feature?: any) => feature)
-	const dependencies = (f: Feature): Feature[] =>
+	const dependencies = (
+		f: cucumber.GherkinDocument.IFeature,
+	): cucumber.GherkinDocument.IFeature[] =>
 		sortedFeatures.filter(({ name }) => {
 			const depNames = featureDependencies
 				.flat()
@@ -107,13 +79,16 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
 		})
 
 	// Now bring the features in the right order
-	const sortedFeatures: Feature[] = sortedFeatureNames.map(
+	const sortedFeatures: cucumber.GherkinDocument.IFeature[] = sortedFeatureNames.map(
 		(featureName: string) =>
-			parsedFeatures.find(({ name }) => name === featureName) as Feature,
+			parsedFeatures.find(
+				({ name }) => name === featureName,
+			) as cucumber.GherkinDocument.IFeature,
 	)
 
 	// Find features to be skipped
-	const isOnly = (f: Feature) => f.tags.find(({ name }) => name === '@Only')
+	const isOnly = (f: cucumber.GherkinDocument.IFeature) =>
+		f.tags.find(({ name }) => name === '@Only')
 	const only = parsedFeatures.filter(isOnly)
 	const onlyNames = only.map(({ name }) => name)
 

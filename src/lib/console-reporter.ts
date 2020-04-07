@@ -65,7 +65,7 @@ const reportFeature = (result: FeatureResult) => {
   if (result.feature.skip) {
     i.push(chalk.magenta(' ↷ '), chalk.magenta('(skipped)'));
   } else {
-    i.push(result.success ? chalk.green(' 💯') : chalk.red.bold(' ❌'));
+    i.push(result.success ? ' 💚' : ' ❌');
     if (result.runTime) {
       i.push(chalk.blue(`⏱ ${result.runTime}ms`));
     }
@@ -102,7 +102,7 @@ const reportScenario = (result: ScenarioResult) => {
 const reportRunResult = (success: boolean, runTime?: Number) => {
   console.log('');
   const i = [
-    success ? chalk.green(' 💯 ALL PASS ') : chalk.red.bold(' 💀 FAIL 👎 '),
+    success ? chalk.green(' 💚 ALL PASS 👍 ') : chalk.red.bold(' ❌ FAIL 👎 '),
   ];
   if (runTime) {
     i.push(chalk.blue(`⏱ ${runTime}ms`));

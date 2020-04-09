@@ -21,6 +21,11 @@ export class ConsoleReporter implements Reporter {
   }
 
   async report(result: RunResult) {
+    console.log('');
+    console.log('-----------------------------');
+    console.log('Feature Test Detailed Results');
+    console.log('-----------------------------');
+    console.log('');
     result.featureResults.forEach(featureResult => {
       reportFeature(featureResult);
       featureResult.scenarioResults.forEach(scenarioResult => {
@@ -29,6 +34,21 @@ export class ConsoleReporter implements Reporter {
           reportStep(stepResult, this.config);
         });
       });
+    });
+    console.log('');
+    console.log('--------------------------------');
+    console.log('Feature Test Summary of Failures');
+    console.log('--------------------------------');
+    console.log('');
+    result.featureResults.forEach(featureResult => {
+      if (!featureResult.feature.skip && !featureResult.success) {
+        reportFeature(featureResult);
+        featureResult.scenarioResults.forEach(scenarioResult => {
+          if (!scenarioResult.skipped && !scenarioResult.success) {
+            reportScenario(scenarioResult);
+          }
+        });
+      }
     });
     reportRunResult(result.success, result.runTime);
     if (result.error) {
@@ -58,7 +78,7 @@ export class ConsoleReporter implements Reporter {
 
 const reportFeature = (result: FeatureResult) => {
   console.log('');
-  console.log('', chalk.yellow.bold(result.feature.name));
+  console.log('', 'Feature: ', chalk.yellow.bold(result.feature.name));
   console.log('');
   const i = [' '];
 
@@ -78,7 +98,7 @@ const reportFeature = (result: FeatureResult) => {
 
 const reportScenario = (result: ScenarioResult) => {
   console.log('');
-  const i = [chalk.gray(result.scenario.type)];
+  const i = [chalk.gray(result.scenario.type) + ':'];
   if (result.skipped) {
     i.push(chalk.magenta(' ↷ '), chalk.magenta('(skipped)'));
     if (result.scenario.name) {

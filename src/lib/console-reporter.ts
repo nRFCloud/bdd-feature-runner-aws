@@ -21,6 +21,11 @@ export class ConsoleReporter implements Reporter {
   }
 
   async report(result: RunResult) {
+    console.log('');
+    console.log('------------------------------');
+    console.log('Feature Tests Detailed Results');
+    console.log('------------------------------');
+    console.log('');
     result.featureResults.forEach(featureResult => {
       reportFeature(featureResult);
       featureResult.scenarioResults.forEach(scenarioResult => {
@@ -30,6 +35,48 @@ export class ConsoleReporter implements Reporter {
         });
       });
     });
+    console.log('');
+    console.log('---------------------------------');
+    console.log('Feature Tests Summary of Failures');
+    console.log('---------------------------------');
+    console.log('');
+    const features = result.featureResults.length;
+    let featuresSkipped = 0;
+    let featureFailures = 0;
+    let scenarios = 0;
+    let scenariosSkipped = 0;
+    let scenarioFailures = 0;
+    let featureFailed = false;
+    result.featureResults.forEach(featureResult => {
+      featureFailed = false;
+      if (featureResult.feature.skip) {
+        featuresSkipped++;
+      } else if (!featureResult.success) {
+        featureFailures++;
+        featureFailed = true;
+        reportFeature(featureResult);
+      }
+      featureResult.scenarioResults.forEach(scenarioResult => {
+        scenarios++;
+        if (featureResult.feature.skip || scenarioResult.skipped) {
+          scenariosSkipped++;
+        } else if (featureFailed && !scenarioResult.success) {
+          scenarioFailures++;
+          reportScenario(scenarioResult);
+        }
+      });
+    });
+    const featuresPassed = features - featuresSkipped - featureFailures;
+    const scenariosPassed = scenarios - scenariosSkipped - scenarioFailures;
+    console.log(
+      `Feature Summary:  ${featureFailures} failed, ${featuresSkipped} skipped, ` +
+        `${featuresPassed} passed, ${features} total`,
+    );
+    console.log(
+      `Scenario Summary: ${scenarioFailures} failed, ${scenariosSkipped} skipped, ` +
+        `${scenariosPassed} passed, ${scenarios} total ` +
+        (featuresSkipped ? `(for non-skipped features)` : ''),
+    );
     reportRunResult(result.success, result.runTime);
     if (result.error) {
       console.error(
@@ -58,14 +105,14 @@ export class ConsoleReporter implements Reporter {
 
 const reportFeature = (result: FeatureResult) => {
   console.log('');
-  console.log('', chalk.yellow.bold(result.feature.name));
+  console.log('', 'Feature: ', chalk.yellow.bold(result.feature.name));
   console.log('');
   const i = [' '];
 
   if (result.feature.skip) {
     i.push(chalk.magenta(' ↷ '), chalk.magenta('(skipped)'));
   } else {
-    i.push(result.success ? chalk.green(' 💯') : chalk.red.bold(' ❌'));
+    i.push(result.success ? ' 💚' : ' ❌');
     if (result.runTime) {
       i.push(chalk.blue(`⏱ ${result.runTime}ms`));
     }
@@ -78,7 +125,7 @@ const reportFeature = (result: FeatureResult) => {
 
 const reportScenario = (result: ScenarioResult) => {
   console.log('');
-  const i = [chalk.gray(result.scenario.type)];
+  const i = [chalk.gray(result.scenario.type) + ':'];
   if (result.skipped) {
     i.push(chalk.magenta(' ↷ '), chalk.magenta('(skipped)'));
     if (result.scenario.name) {
@@ -102,7 +149,7 @@ const reportScenario = (result: ScenarioResult) => {
 const reportRunResult = (success: boolean, runTime?: Number) => {
   console.log('');
   const i = [
-    success ? chalk.green(' 💯 ALL PASS ') : chalk.red.bold(' 💀 FAIL 👎 '),
+    success ? chalk.green(' 💚 ALL PASS 👍 ') : chalk.red.bold(' ❌ FAIL 👎 '),
   ];
   if (runTime) {
     i.push(chalk.blue(`⏱ ${runTime}ms`));

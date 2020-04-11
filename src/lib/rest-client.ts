@@ -36,12 +36,18 @@ export class RestClient {
     extraHeaders?: Headers,
     body?: any,
     passBinary: boolean = false,
+    directUrl: boolean = false,
+    jsonResponseRequired: boolean = true,
   ): Promise<string> {
     const headers: Headers = {
       ...this.headers,
       ...extraHeaders,
     };
-    const url = `${this.endpoint.replace(/\/+$/, '')}/${path.replace(
+    let apiGatewayUrlPrefix = '';
+    if (!directUrl) {
+      apiGatewayUrlPrefix = this.endpoint.replace(/\/+$/, '') + '/';
+    }
+    const url = `${apiGatewayUrlPrefix}${path.replace(
       /^\/+/,
       '',
     )}${toQueryString(queryString || {})}`;
@@ -50,6 +56,15 @@ export class RestClient {
         ? JSON.stringify(body)
         : body
       : undefined;
+    // Uncomment for debug
+    /* console.log(
+      'URL is:',
+      url,
+      '\nHeaders are:',
+      headers,
+      '\nBody is:\n',
+      bodyToSend,
+    ); */
     const res: Response = await fetch(url, {
       method,
       headers,
@@ -64,7 +79,8 @@ export class RestClient {
         }`,
       );
     }
-    if (/^application\/([^ \/]+\+)?json$/.test(mediaType) === false) {
+    const isJson = /^application\/([^ \/]+\+)?json$/.test(mediaType);
+    if (jsonResponseRequired && !isJson) {
       throw new Error(
         `The content-type "${contentType}" of the response is not JSON!`,
       );
@@ -78,7 +94,11 @@ export class RestClient {
     this.response = {
       statusCode,
       headers: h,
-      body: contentLength ? await res.json() : undefined,
+      body: contentLength
+        ? isJson
+          ? await res.json()
+          : await res.blob()
+        : undefined,
     };
     return url;
   }

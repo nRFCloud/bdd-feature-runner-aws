@@ -39,6 +39,18 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     s(/^the endpoint is "([^"]+)"$/, async ([endpoint]) => {
       client.endpoint = endpoint;
     }),
+    s(/^I GET (?:to )?([^ ]+) directly$/, async ([path]) => {
+      return client.request(
+        'GET',
+        path,
+        undefined,
+        undefined,
+        undefined,
+        false, // passBinary, N/A
+        true, // directURL, not thru our API Gateway
+        false, // jsonResponseRequired
+      );
+    }),
     s(
       /^I (GET|PUT|POST|PATCH|DELETE) (?:to )?([^ ]+)$/,
       async ([method, path]) => {
@@ -74,12 +86,36 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       expect(body).to.deep.equal(j);
       return body;
     }),
+    s(/^"([^"]+)" of the response body is empty$/, async ([exp]) => {
+      const e = jsonata(exp);
+      const body = filterOutNulls(client.response.body);
+      console.log(body);
+      const v = e.evaluate(body);
+      expect(v).to.be.an('undefined');
+      return v;
+    }),
     s(/^"([^"]+)" of the response body is not empty$/, async ([exp]) => {
       const e = jsonata(exp);
       const body = filterOutNulls(client.response.body);
       console.log(body);
       const v = e.evaluate(body);
       expect(v).to.not.be.an('undefined');
+      return v;
+    }),
+    s(/^"([^"]+)" of the response body is null$/, async ([exp]) => {
+      const e = jsonata(exp);
+      const body = filterOutNulls(client.response.body);
+      console.log(body);
+      const v = e.evaluate(body);
+      expect(v).to.equal(null);
+      return v;
+    }),
+    s(/^"([^"]+)" of the response body is not null$/, async ([exp]) => {
+      const e = jsonata(exp);
+      const body = filterOutNulls(client.response.body);
+      console.log(body);
+      const v = e.evaluate(body);
+      expect(v).to.not.equal(null);
       return v;
     }),
     s(

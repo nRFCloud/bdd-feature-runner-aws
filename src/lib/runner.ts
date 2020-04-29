@@ -302,10 +302,7 @@ export class FeatureRunner<W> {
     );
     const missed = interpolated.match(/\{[^}\W]+\}/g);
     if (missed && missed.length) {
-      throw new StoreKeyUndefinedError(
-        missed.map(k => k.slice(1, -1)),
-        data,
-      );
+      throw new StoreKeyUndefinedError(missed.map(k => k.slice(1, -1)), data);
     }
     return interpolated;
   }

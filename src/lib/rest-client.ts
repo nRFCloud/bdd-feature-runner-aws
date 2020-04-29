@@ -43,6 +43,7 @@ export class RestClient {
       ...this.headers,
       ...extraHeaders,
     };
+
     let apiGatewayUrlPrefix = '';
     if (!directUrl) {
       apiGatewayUrlPrefix = this.endpoint.replace(/\/+$/, '') + '/';
@@ -56,6 +57,10 @@ export class RestClient {
         ? JSON.stringify(body)
         : body
       : undefined;
+    headers['Content-Type'] =
+      body != null && !passBinary && typeof body !== 'string'
+        ? 'application/json'
+        : 'text/plain';
     // Uncomment for debug
     /* console.log(
       'URL is:',
@@ -72,11 +77,10 @@ export class RestClient {
     });
     const contentType: string = res.headers.get('content-type') || '',
       mediaType: string = contentType.split(';')[0];
+    const text = await res.text();
     if (headers.Accept.indexOf(mediaType) < 0) {
       throw new Error(
-        `The content-type "${contentType}" of the response does not match accepted media-type ${
-          headers.Accept
-        }`,
+        `The content-type "${contentType}" of the response does not match accepted media-type ${headers.Accept}`,
       );
     }
     const isJson = /^application\/([^ \/]+\+)?json$/.test(mediaType);
@@ -96,8 +100,8 @@ export class RestClient {
       headers: h,
       body: contentLength
         ? isJson
-          ? await res.json()
-          : await res.blob()
+          ? JSON.parse(text)
+          : Buffer.from(text)
         : undefined,
     };
     return url;

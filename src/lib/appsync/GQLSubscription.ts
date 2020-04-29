@@ -10,11 +10,11 @@ export class GQLSubscription {
   public readonly connection: Promise<Client>;
   public messages: any[] = [];
   private readonly client: Client;
-  private readonly subscribers: ({
+  private readonly subscribers: {
     id: string;
     matches: (msg: object) => boolean;
     onMatch: ((msg: any) => void)[];
-  })[] = [];
+  }[] = [];
   private readonly subscriberMessages: { [key: string]: any[] } = {};
 
   constructor(

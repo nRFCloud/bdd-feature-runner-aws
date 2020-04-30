@@ -44,6 +44,7 @@
     "jsonata": "^1.6.4",
     "node-fetch": "^2.3.0",
     "paho-mqtt": "^1.1.0",
+    "query-string": "^6.12.1",
     "toposort": "^2.0.2",
     "uuid": "^3.3.3",
     "ws": "^6.2.1"

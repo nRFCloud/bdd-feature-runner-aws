@@ -1,4 +1,4 @@
-import * as querystring from 'querystring';
+import * as querystring from 'query-string';
 
 const { fetch } = require('fetch-ponyfill')();
 
@@ -6,7 +6,7 @@ const toQueryString = (obj: any): string => {
   if (!Object.keys(obj).length) {
     return '';
   }
-  return '?' + querystring.stringify(obj);
+  return '?' + querystring.stringify(obj, { arrayFormat: 'comma' });
 };
 
 export type Headers = {

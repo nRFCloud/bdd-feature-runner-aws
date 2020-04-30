@@ -58,7 +58,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       },
     ),
     s(
-      /^I (GET|DELETE) ([^ ]+) with this query$/,
+      /^I (GET|PUT|POST|PATCH|DELETE) ([^ ]+) with this query$/,
       async ([method, path], step) => {
         if (!step.interpolatedArgument) {
           throw new Error('Must provide argument!');

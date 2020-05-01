@@ -91,7 +91,27 @@ export class ConsoleReporter implements Reporter {
     if (!this.config.printProgress) {
       return;
     }
-    const i = [' ', chalk.magenta(' ℹ '), chalk.cyan(type)];
+    let progressType;
+    switch (type) {
+      case 'step':
+        progressType = chalk.green(type);
+        break;
+      case 'step error':
+        progressType = chalk.red(type);
+        break;
+      case 'scenario':
+        progressType = chalk.yellow(type);
+        break;
+      case 'retry':
+        progressType = chalk.cyan(type);
+        break;
+      case 'feature':
+        progressType = chalk.magenta(type);
+        break;
+      default:
+        progressType = chalk.cyan(type);
+    }
+    const i = [' ', chalk.magenta(' ℹ '), progressType];
     if (info) {
       i.push(chalk.grey(info));
     }

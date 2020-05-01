@@ -83,7 +83,9 @@ export class RestClient {
     // console.log(res.headers, text);
     if (headers.Accept.indexOf(mediaType) < 0) {
       throw new Error(
-        `The content-type "${contentType}" of the response does not match accepted media-type ${headers.Accept}`,
+        `The content-type "${contentType}" of the response does not match accepted media-type ${
+          headers.Accept
+        }`,
       );
     }
     const isJson = /^application\/([^ \/]+\+)?json$/.test(mediaType);

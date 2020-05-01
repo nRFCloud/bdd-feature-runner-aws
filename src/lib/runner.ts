@@ -44,7 +44,7 @@ export class FeatureRunner<W> {
 
   async progress(type: string, info?: string) {
     await Promise.all(
-      this.reporters.map(reporter => reporter.progress(type, info)),
+      this.reporters.map((reporter) => reporter.progress(type, info)),
     );
   }
 
@@ -64,11 +64,13 @@ export class FeatureRunner<W> {
       runTime: Date.now() - startRun,
       featureResults,
     };
-    await Promise.all(this.reporters.map(reporter => reporter.report(result)));
+    await Promise.all(
+      this.reporters.map((reporter) => reporter.report(result)),
+    );
     await this.cleaners.reduce(
       (promise, cleaner) =>
         promise.then(async () =>
-          cleaner(this).then(res => this.progress('cleaner', res)),
+          cleaner(this).then((res) => this.progress('cleaner', res)),
         ),
       Promise.resolve(),
     );
@@ -120,7 +122,7 @@ export class FeatureRunner<W> {
                     keyword: 'Scenario',
                     argument: scenario.argument,
                     name: `${scenario.name} (${values.join(',')})`,
-                    steps: scenario.steps.map(step => ({
+                    steps: scenario.steps.map((step) => ({
                       ...step,
                       text: replace(step.text),
                       argument: step.argument
@@ -153,7 +155,7 @@ export class FeatureRunner<W> {
    * Runs a scenario and retries it with a backoff
    */
   async retryScenario(scenario: Scenario): Promise<ScenarioResult> {
-    return new Promise<ScenarioResult>(async resolve => {
+    return new Promise<ScenarioResult>(async (resolve) => {
       // Run the scenario without delay
       let lastResult: ScenarioResult = await this.runScenario(scenario);
       if (lastResult.success) {
@@ -166,7 +168,7 @@ export class FeatureRunner<W> {
         maxDelay: 16000,
       });
       b.failAfter(5);
-      b.on('ready', async num => {
+      b.on('ready', async (num) => {
         const r = await this.runScenario(scenario);
         lastResult = {
           ...r,
@@ -208,7 +210,7 @@ export class FeatureRunner<W> {
               stepResults.push(await this.runStep(step));
             }
           })
-          .catch(async error => {
+          .catch(async (error) => {
             await this.progress('step error', error);
             stepResults.push({
               success: false,
@@ -303,7 +305,7 @@ export class FeatureRunner<W> {
     const missed = interpolated.match(/\{[^}\W]+\}/g);
     if (missed && missed.length) {
       throw new StoreKeyUndefinedError(
-        missed.map(k => k.slice(1, -1)),
+        missed.map((k) => k.slice(1, -1)),
         data,
       );
     }

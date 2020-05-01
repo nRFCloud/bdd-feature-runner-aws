@@ -16,7 +16,7 @@ export const webhookStepRunners = <W extends StoreWithWorld>(): StepRunner<
   {
     willRun: regexMatcher(/^the Webhook Receiver "([^"]+)" should be called$/),
     run: async ([MessageGroupId], _, runner) =>
-      r.receiveWebhookRequest(MessageGroupId, runner).then(r => r.body),
+      r.receiveWebhookRequest(MessageGroupId, runner).then((r) => r.body),
   },
   {
     willRun: regexMatcher(

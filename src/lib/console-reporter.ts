@@ -26,11 +26,11 @@ export class ConsoleReporter implements Reporter {
     console.log('Feature Tests Detailed Results');
     console.log('------------------------------');
     console.log('');
-    result.featureResults.forEach(featureResult => {
+    result.featureResults.forEach((featureResult) => {
       reportFeature(featureResult);
-      featureResult.scenarioResults.forEach(scenarioResult => {
+      featureResult.scenarioResults.forEach((scenarioResult) => {
         reportScenario(scenarioResult);
-        scenarioResult.stepResults.forEach(stepResult => {
+        scenarioResult.stepResults.forEach((stepResult) => {
           reportStep(stepResult, this.config);
         });
       });
@@ -47,7 +47,7 @@ export class ConsoleReporter implements Reporter {
     let scenariosSkipped = 0;
     let scenarioFailures = 0;
     let featureFailed = false;
-    result.featureResults.forEach(featureResult => {
+    result.featureResults.forEach((featureResult) => {
       featureFailed = false;
       if (featureResult.feature.skip) {
         featuresSkipped++;
@@ -56,7 +56,7 @@ export class ConsoleReporter implements Reporter {
         featureFailed = true;
         reportFeature(featureResult);
       }
-      featureResult.scenarioResults.forEach(scenarioResult => {
+      featureResult.scenarioResults.forEach((scenarioResult) => {
         scenarios++;
         if (featureResult.feature.skip || scenarioResult.skipped) {
           scenariosSkipped++;
@@ -203,7 +203,7 @@ const reportStep = (result: StepResult, config: Config) => {
   if (result.result && config.printResults) {
     [
       ...(Array.isArray(result.result) ? result.result : [result.result]),
-    ].forEach(r => {
+    ].forEach((r) => {
       console.log(chalk.cyan('   ▶'), chalk.cyan(JSON.stringify(r)));
     });
   }

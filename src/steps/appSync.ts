@@ -25,7 +25,7 @@ export const appSyncBeforeAll = async (
 };
 
 export const appSyncAfterAll = async (runner: FeatureRunner<Store>) => {
-  Object.keys(runner.store.appSyncClient.subscriptions).forEach(id =>
+  Object.keys(runner.store.appSyncClient.subscriptions).forEach((id) =>
     runner.store.appSyncClient.subscriptions[id].disconnect(),
   );
 };
@@ -225,10 +225,10 @@ export const appSyncStepRunners = <
         expect(client.response.data).to.have.property(client.selection);
         const opResult = client.response.data[client.selection];
         const checks: { [key: string]: (fragment: any) => any } = {
-          null: fragment => expect(fragment).to.equal(null),
-          undefined: fragment => expect(fragment).to.equal(undefined),
-          true: fragment => expect(fragment).to.equal(true),
-          false: fragment => expect(fragment).to.equal(false),
+          null: (fragment) => expect(fragment).to.equal(null),
+          undefined: (fragment) => expect(fragment).to.equal(undefined),
+          true: (fragment) => expect(fragment).to.equal(true),
+          false: (fragment) => expect(fragment).to.equal(false),
         };
         checks[expected](jsonata(exp).evaluate(opResult));
         return opResult;

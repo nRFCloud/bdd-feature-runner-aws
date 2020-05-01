@@ -42,7 +42,7 @@ export class GQLSubscription {
         onSuccess: async () => {
           await Promise.all(
             topics.map(
-              topic =>
+              (topic) =>
                 new Promise((resolve1, reject1) => {
                   this.client.subscribe(topic, {
                     onSuccess: resolve1,
@@ -65,7 +65,7 @@ export class GQLSubscription {
           this.subscriberMessages[id] = [];
         }
         this.subscriberMessages[id].push(result);
-        onMatch.forEach(fn => fn(result));
+        onMatch.forEach((fn) => fn(result));
       }
     });
   };
@@ -84,7 +84,7 @@ export class GQLSubscription {
       onMatch: [],
     });
     // Notify about existing messages
-    this.messages.forEach(message => this.notifySubcribers(message));
+    this.messages.forEach((message) => this.notifySubcribers(message));
   };
 
   disconnect = () => {

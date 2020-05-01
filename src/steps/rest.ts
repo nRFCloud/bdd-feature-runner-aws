@@ -22,8 +22,9 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       const originalItemsCount = body.items.length;
       body.items = body.items.filter((item: any) => item !== null);
       console.log(
-        `filterOutNulls removed ${originalItemsCount -
-          body.items.length} null items`,
+        `filterOutNulls removed ${
+          originalItemsCount - body.items.length
+        } null items`,
       );
     }
     return body;

@@ -53,14 +53,14 @@ export type SkippableFeature = Feature & {
 };
 
 export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
-  const parsedFeatures: Feature[] = featureData.map(d => {
+  const parsedFeatures: Feature[] = featureData.map((d) => {
     // Parse the feature files
     const scanner = new Gherkin.TokenScanner(d.toString());
     return parser.parse(scanner, matcher).feature;
   });
   const featureNames = parsedFeatures.map(({ name }) => name);
   // Sort the features by the step 'I am run after the "..." feature' using toposort
-  const featureDependencies = parsedFeatures.map(feature => {
+  const featureDependencies = parsedFeatures.map((feature) => {
     const bg = feature.children.find(({ type }) => type === 'Background');
     if (bg) {
       const afterStep = bg.steps.find(({ text }) => afterRx.test(text));
@@ -94,7 +94,7 @@ export const parseFeatures = (featureData: Buffer[]): SkippableFeature[] => {
     .filter(({ tags }) => tags.find(({ name }) => name === '@Only'))
     .map(({ name }) => name);
 
-  return sortedFeatures.map(f => {
+  return sortedFeatures.map((f) => {
     const { tags, name: featureName } = f;
     const skip =
       tags.find(({ name }) => name === '@Skip') ||
@@ -111,5 +111,5 @@ export const fromDirectory = async (
 ): Promise<SkippableFeature[]> => {
   const scan = path.join(path.resolve(dir), '*.feature');
   const featureFiles = await glob(scan);
-  return parseFeatures(featureFiles.map(f => readFileSync(f)));
+  return parseFeatures(featureFiles.map((f) => readFileSync(f)));
 };

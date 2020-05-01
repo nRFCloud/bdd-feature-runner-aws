@@ -57,10 +57,12 @@ export class RestClient {
         ? JSON.stringify(body)
         : body
       : undefined;
-    headers['Content-Type'] =
+    console.log(headers);
+    const detectedContentType =
       body != null && !passBinary && typeof body !== 'string'
         ? 'application/json'
         : 'text/plain';
+    headers['Content-Type'] = headers['Content-Type'] ?? detectedContentType;
     // Uncomment for debug
     /* console.log(
       'URL is:',
@@ -78,6 +80,7 @@ export class RestClient {
     const contentType: string = res.headers.get('content-type') || '',
       mediaType: string = contentType.split(';')[0];
     const text = await res.text();
+    // console.log(res.headers, text);
     if (headers.Accept.indexOf(mediaType) < 0) {
       throw new Error(
         `The content-type "${contentType}" of the response does not match accepted media-type ${headers.Accept}`,

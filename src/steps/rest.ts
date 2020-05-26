@@ -6,8 +6,6 @@ import { regexMatcher } from '../lib/regexMatcher';
 import { v4 } from 'uuid';
 import { readFileSync } from 'fs';
 
-const client = new RestClient();
-
 export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
   const s = (rx: RegExp, run: StepRunnerFunc<W>): StepRunner<W> => ({
     willRun: regexMatcher(rx),
@@ -32,15 +30,19 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
   return [
     // Note! Setting a header sets it for all future requests too, until you change it, or clear it (see below)
     s(/^the ([^ ]+) header is "([^"]+)"$/, async ([name, value]) => {
+      const client = new RestClient();
       client.headers[name] = value;
     }),
     s(/^I clear the ([^ ]+) request header$/, async ([name]) => {
+      const client = new RestClient();
       delete client.headers[name];
     }),
     s(/^the endpoint is "([^"]+)"$/, async ([endpoint]) => {
+      const client = new RestClient();
       client.endpoint = endpoint;
     }),
     s(/^I GET (?:to )?([^ ]+) directly$/, async ([path]) => {
+      const client = new RestClient();
       return client.request(
         'GET',
         path,
@@ -55,6 +57,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     s(
       /^I (GET|PUT|POST|PATCH|DELETE) (?:to )?([^ ]+)$/,
       async ([method, path]) => {
+        const client = new RestClient();
         return client.request(method, path);
       },
     ),
@@ -65,14 +68,17 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
           throw new Error('Must provide argument!');
         }
         const j = JSON.parse(step.interpolatedArgument);
+        const client = new RestClient();
         return client.request(method, path, j);
       },
     ),
     s(/^the response status code should be ([0-9]+)$/, async ([statusCode]) => {
+      const client = new RestClient();
       expect(client.response.statusCode).to.equal(+statusCode);
       return client.response.statusCode;
     }),
     s(/^the response ([^ ]+) should be "([^"]+)"$/, async ([name, value]) => {
+      const client = new RestClient();
       expect(client.response.headers).to.have.property(name.toLowerCase());
       expect(client.response.headers[name.toLowerCase()]).to.equal(value);
       return client.response.headers[name.toLowerCase()];
@@ -82,6 +88,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
         throw new Error('Must provide argument!');
       }
       const j = JSON.parse(step.interpolatedArgument);
+      const client = new RestClient();
       const body = filterOutNulls(client.response.body);
       console.log(body);
       expect(body).to.deep.equal(j);
@@ -89,6 +96,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is empty$/, async ([exp]) => {
       const e = jsonata(exp);
+      const client = new RestClient();
       const body = filterOutNulls(client.response.body);
       console.log(body);
       const v = e.evaluate(body);
@@ -97,6 +105,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is not empty$/, async ([exp]) => {
       const e = jsonata(exp);
+      const client = new RestClient();
       const body = filterOutNulls(client.response.body);
       console.log(body);
       const v = e.evaluate(body);
@@ -105,6 +114,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is null$/, async ([exp]) => {
       const e = jsonata(exp);
+      const client = new RestClient();
       const body = filterOutNulls(client.response.body);
       console.log(body);
       const v = e.evaluate(body);
@@ -113,6 +123,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is not null$/, async ([exp]) => {
       const e = jsonata(exp);
+      const client = new RestClient();
       const body = filterOutNulls(client.response.body);
       console.log(body);
       const v = e.evaluate(body);
@@ -123,6 +134,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should equal "([^"]+)"$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
+        const client = new RestClient();
         const body = filterOutNulls(client.response.body);
         console.log(body);
         const v = e.evaluate(body);
@@ -134,6 +146,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should equal ([0-9]+)$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
+        const client = new RestClient();
         const body = filterOutNulls(client.response.body);
         console.log(body);
         const v = e.evaluate(body);
@@ -145,6 +158,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should be greater than ([0-9]+)$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
+        const client = new RestClient();
         const body = filterOutNulls(client.response.body);
         console.log(body);
         const v = e.evaluate(body);
@@ -160,6 +174,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
         }
         const j = JSON.parse(step.interpolatedArgument);
         const e = jsonata(exp);
+        const client = new RestClient();
         const body = filterOutNulls(client.response.body);
         console.log(body);
         const v = e.evaluate(body);
@@ -178,6 +193,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
           path = path.replace('<guid>', v4());
         }
         const j = JSON.parse(step.interpolatedArgument);
+        const client = new RestClient();
         return [await client.request(method, path, undefined, undefined, j), j];
       },
     ),
@@ -189,6 +205,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
           path = path.replace('<guid>', v4());
         }
         const buffer = readFileSync(localFile);
+        const client = new RestClient();
         return [
           await client.request(
             method,
@@ -205,6 +222,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     s(
       /^a page with ([0-9]+)(?: of ([0-9]+))? items? is returned$/,
       async ([num, total]) => {
+        const client = new RestClient();
         expect(client.response.body).to.have.property('items');
         expect(client.response.body).to.have.property('total');
         if (total) {
@@ -217,6 +235,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       },
     ),
     s(/^a page is returned$/, async () => {
+      const client = new RestClient();
       expect(client.response.body).to.have.property('items');
       expect(client.response.body).to.have.property('total');
       return client.response.body;
@@ -225,6 +244,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^I store "([^"]+)" of the response body as "([^"]+)"(?: encoded with (encodeURIComponent))?$/,
       async ([expression, storeName, encoder], _, runner) => {
         const e = jsonata(expression);
+        const client = new RestClient();
         const result = e.evaluate(client.response.body);
         expect(result).to.not.be.an('undefined');
         switch (encoder) {
@@ -240,6 +260,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     s(
       /^I store the ([^ ]+) response header as "([^"]+)"$/,
       async ([header, storeName], _, runner) => {
+        const client = new RestClient();
         expect(client.response.headers).to.have.property(header.toLowerCase());
         expect(client.response.headers[header.toLowerCase()]).to.have.not.be.an(
           'undefined',

@@ -67,14 +67,14 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
         throw new Error('Must provide argument!');
       }
       const j = JSON.parse(step.interpolatedArgument);
-      const body = filterOutNulls(client.response.body);
+      const body = client.response.body;
       console.log(body);
       expect(body).to.deep.equal(j);
       return body;
     }),
     s(/^"([^"]+)" of the response body is empty$/, async ([exp]) => {
       const e = jsonata(exp);
-      const body = filterOutNulls(client.response.body);
+      const body = client.response.body;
       console.log(body);
       const v = e.evaluate(body);
       expect(v).to.be.an('undefined');
@@ -82,7 +82,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is not empty$/, async ([exp]) => {
       const e = jsonata(exp);
-      const body = filterOutNulls(client.response.body);
+      const body = client.response.body;
       console.log(body);
       const v = e.evaluate(body);
       expect(v).to.not.be.an('undefined');
@@ -90,7 +90,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is null$/, async ([exp]) => {
       const e = jsonata(exp);
-      const body = filterOutNulls(client.response.body);
+      const body = client.response.body;
       console.log(body);
       const v = e.evaluate(body);
       expect(v).to.equal(null);
@@ -98,7 +98,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
     }),
     s(/^"([^"]+)" of the response body is not null$/, async ([exp]) => {
       const e = jsonata(exp);
-      const body = filterOutNulls(client.response.body);
+      const body = client.response.body;
       console.log(body);
       const v = e.evaluate(body);
       expect(v).to.not.equal(null);
@@ -108,7 +108,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should equal "([^"]+)"$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
-        const body = filterOutNulls(client.response.body);
+        const body = client.response.body;
         console.log(body);
         const v = e.evaluate(body);
         expect(v).to.equal(expected);
@@ -119,7 +119,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should equal ([0-9]+)$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
-        const body = filterOutNulls(client.response.body);
+        const body = client.response.body;
         console.log(body);
         const v = e.evaluate(body);
         expect(v).to.equal(+expected);
@@ -130,7 +130,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
       /^"([^"]+)" of the response body should be greater than ([0-9]+)$/,
       async ([exp, expected]) => {
         const e = jsonata(exp);
-        const body = filterOutNulls(client.response.body);
+        const body = client.response.body;
         console.log(body);
         const v = e.evaluate(body);
         expect(v).to.be.gt(+expected);
@@ -145,7 +145,7 @@ export const restStepRunners = <W extends Store>(): StepRunner<W>[] => {
         }
         const j = JSON.parse(step.interpolatedArgument);
         const e = jsonata(exp);
-        const body = filterOutNulls(client.response.body);
+        const body = client.response.body;
         console.log(body);
         const v = e.evaluate(body);
         expect(v).to.deep.equal(j);
